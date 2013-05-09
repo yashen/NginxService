@@ -1,66 +1,40 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace NginxService
 {
-	public class NginxController
-	{
-		private Process _nginxProcess;
-		private string _nginxExePath;
+    public class NginxController
+    {
+        private NginxMasterProcess _nginxProcess;
 
-		public void Start()
-		{
-			Stop();
-			StartMasterProcess();
-		}
+        public void Start()
+        {
+            Stop();
+            StartMasterProcess();
+            AssertNginxWasStarted();
+        }
 
-		public void Stop()
-		{
-			if (IsRunning())
-			{
-				SendShutdownCommandToMasterProcess();
-				StopMasterProcess();
-			}
-		}
+        public void Stop()
+        {
+            if (_nginxProcess != null)
+            {
+                _nginxProcess.StopMasterProcess();
+            }
+        }
 
-		public bool IsRunning()
-		{
-			return _nginxProcess != null && !_nginxProcess.HasExited;
-		}
+        private void StartMasterProcess()
+        {
+            _nginxProcess = new NginxMasterProcess();
+            _nginxProcess.StartMasterProcess();
+        }
 
-		private void StopMasterProcess()
-		{
-			_nginxProcess.Close();
-			_nginxProcess = null;
-		}
-
-		private void StartMasterProcess()
-		{
-			_nginxProcess = new Process();
-			_nginxProcess.StartInfo.FileName = NginxExePath;
-			_nginxProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-			_nginxProcess.Start();
-		}
-
-		private void SendShutdownCommandToMasterProcess()
-		{
-			var signalProcess = new Process();
-			signalProcess.StartInfo.FileName = NginxExePath;
-			signalProcess.StartInfo.Arguments = "-s stop";
-			signalProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-			signalProcess.Start();
-			signalProcess.WaitForExit(10000);
-		}
-
-		private string NginxExePath
-		{
-			get
-			{
-				if (string.IsNullOrEmpty(_nginxExePath))
-				{
-					_nginxExePath = new NginxExeLocator().GetNginxExePath();
-				}
-				return _nginxExePath;
-			}
-		}
-	}
+        private void AssertNginxWasStarted()
+        {
+            Execute.UntilTrueOrTimeout(_nginxProcess.IsRunning, 10, TimeSpan.FromMilliseconds(250));
+            if (!_nginxProcess.IsRunning())
+            {
+                throw new Exception("Failed to start the nginx process");
+            }
+        }
+    }
 }

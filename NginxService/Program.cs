@@ -4,16 +4,17 @@ namespace NginxService
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static int Main(string[] args)
 		{
-			HostFactory.Run(x =>
+			var host = HostFactory.New(x =>
 			{
 				x.Service<NginxController>(s => 
 				{
 					s.ConstructUsing(name => new NginxController());
-					s.WhenStarted(tc => tc.Start());
+                    s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
 				});
+	
 				x.RunAsNetworkService();
 				x.StartAutomatically();
 
@@ -21,6 +22,7 @@ namespace NginxService
 				x.SetDisplayName("nginx");
 				x.SetServiceName("nginx");
 			});
-		}
+		    return (int) host.Run();
+		}	
 	}
 }
