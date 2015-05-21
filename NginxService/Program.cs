@@ -13,6 +13,8 @@ namespace NginxService
 					s.ConstructUsing(name => new NginxController());
                     s.WhenStarted(tc => tc.Start());
 					s.WhenStopped(tc => tc.Stop());
+          s.WhenContinued(tc => { });
+          s.WhenPaused(tc => tc.ReloadConfig());
 				});
 	
 				x.RunAsNetworkService();
@@ -21,6 +23,7 @@ namespace NginxService
 				x.SetDescription("Nginx web server");
 				x.SetDisplayName("nginx");
 				x.SetServiceName("nginx");
+        x.EnablePauseAndContinue();
 			});
 		    return (int) host.Run();
 		}	

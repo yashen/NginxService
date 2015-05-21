@@ -35,5 +35,10 @@ namespace NginxService
         {
             return File.Exists(_nginxExeLocator.GetNginxPidPath());
         }
+
+        public void ReloadConfig() {
+          var signalProcess = new NginxSignalProcess();
+          signalProcess.SendReloadCommand();
+        }
     }
 }

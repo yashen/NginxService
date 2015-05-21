@@ -11,6 +11,10 @@ namespace NginxService
             SendSignalToMasterProcess("stop");
         }
 
+        public void SendReloadCommand() {
+          SendSignalToMasterProcess("reload");
+        }
+
         private void SendSignalToMasterProcess(string signal)
         {
             var signalProcess = new Process();

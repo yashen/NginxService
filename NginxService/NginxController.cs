@@ -36,5 +36,11 @@ namespace NginxService
                 throw new Exception("Failed to start the nginx process");
             }
         }
+
+        public void ReloadConfig() {
+          if (_nginxProcess != null) {
+            _nginxProcess.ReloadConfig();
+          }
+        }
     }
 }
